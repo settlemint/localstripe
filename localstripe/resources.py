@@ -545,6 +545,8 @@ class Customer(StripeObject):
                 assert set(address.keys()).issubset({
                     'city', 'country', 'line1', 'line2', 'postal_code',
                     'state'})
+                if 'country' in set(address.keys()):
+                    assert re.match("^[A-Za-z]{2}$",address.country)
                 assert all(type(f) is str for f in address.values())
             if invoice_settings is None:
                 invoice_settings = {}
