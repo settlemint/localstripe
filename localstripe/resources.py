@@ -1322,7 +1322,6 @@ class InvoiceItem(StripeObject):
                  unit_amount=None, **kwargs):
         if kwargs:
             raise UserError(400, 'Unexpected ' + ', '.join(kwargs.keys()))
-
         amount = try_convert_to_int(amount)
         quantity = try_convert_to_int(quantity)
         unit_amount = try_convert_to_int(unit_amount)
@@ -1352,13 +1351,13 @@ class InvoiceItem(StripeObject):
             if tax_rates is not None:
                 assert type(tax_rates) is list
                 assert all(type(tr) is str for tr in tax_rates)
-            # if amount is not None:
-            #     assert type(amount) is int
-            #     assert unit_amount is None
-            # if unit_amount is not None:
-            #     assert type(unit_amount) is int
-            #     assert quantity is not None
-            #     assert type(quantity) is int
+            if amount is not None:
+                assert type(amount) is int
+                assert unit_amount is None
+            if unit_amount is not None:
+                assert type(unit_amount) is int
+                assert quantity is not None
+                assert type(quantity) is int
 
         except AssertionError:
             raise UserError(400, 'Bad request')
