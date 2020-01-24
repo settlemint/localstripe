@@ -935,7 +935,7 @@ class Invoice(StripeObject):
 
     @property
     def subtotal(self):
-        return sum([ii.amount for ii in self.lines._list])
+        return sum([(ii.amount or ii.unit_amount * ii.quantity) for ii in self.lines._list])
 
     @property
     def tax(self):
@@ -1135,6 +1135,9 @@ class Invoice(StripeObject):
                             description=plan.name,
                             tax_rates=tax_rates,
                             customer=customer))
+        invoice_items = invoice_items + [ii for ii in InvoiceItem._api_list_all(
+        None, customer=customer, limit=99)._list
+        if ii.invoice is None]
 
         if tax_percent is None:
             if subscription_tax_percent is not None:
@@ -1146,7 +1149,7 @@ class Invoice(StripeObject):
         if current_subscription:
             date = current_subscription.current_period_end
 
-        if not simulation and not current_subscription:
+        if not simulation and not current_subscription and len(invoice_items) == 0:
             raise UserError(404, 'No upcoming invoices for customer')
 
         elif not simulation and current_subscription:
@@ -1356,7 +1359,7 @@ class InvoiceItem(StripeObject):
                 assert unit_amount is None
             if unit_amount is not None:
                 assert type(unit_amount) is int
-                assert quantity is not None
+            if quantity is not None:
                 assert type(quantity) is int
 
         except AssertionError:
