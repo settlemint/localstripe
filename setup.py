@@ -37,4 +37,9 @@ setup(
         'aiohttp >=2.3.2',
         'python-dateutil >=2.6.1',
     ],
+    extras_require={
+        'dev': [
+            'ptvsd'
+        ]
+    }
 )
