@@ -28,7 +28,6 @@ from dateutil.relativedelta import relativedelta
 from .errors import UserError
 from .webhooks import schedule_webhook
 
-
 # Save built-in keyword `type`, because some classes override it by using
 # `type` as a method argument:
 _type = type
@@ -203,7 +202,7 @@ class StripeObject(object):
                 if isinstance(value, StripeObject):
                     obj[key] = value._export()
                 elif (isinstance(value, list) and len(value) and
-                        isinstance(value[0], StripeObject)):
+                      isinstance(value[0], StripeObject)):
                     obj[key] = [item._export() for item in value]
                 elif isinstance(value, dict):
                     obj[key] = value.copy()
@@ -231,6 +230,7 @@ class StripeObject(object):
                     obj[k] = cls._api_retrieve(id)._export()
                 if path is not None:
                     do_expand(path, obj[k])
+
         try:
             for path in expand:
                 do_expand(path, obj)
@@ -765,7 +765,7 @@ class Customer(StripeObject):
 
         if obj.customer != id:
             raise UserError(404, 'Customer ' + id + ' does not have a '
-                                 'subscription with ID ' + subscription_id)
+                                                    'subscription with ID ' + subscription_id)
 
         return obj
 
@@ -775,7 +775,7 @@ class Customer(StripeObject):
 
         if obj.customer != id:
             raise UserError(404, 'Customer ' + id + ' does not have a '
-                                 'subscription with ID ' + subscription_id)
+                                                    'subscription with ID ' + subscription_id)
 
         return Subscription._api_update(subscription_id, **data)
 
@@ -916,7 +916,7 @@ class Invoice(StripeObject):
 
         pending_items = [ii for ii in InvoiceItem._api_list_all(
             None, customer=self.customer, limit=99)._list
-            if ii.invoice is None]
+                         if ii.invoice is None]
         for ii in pending_items:
             if not simulation:
                 ii.invoice = self.id
@@ -935,7 +935,8 @@ class Invoice(StripeObject):
 
     @property
     def subtotal(self):
-        return sum([(ii.amount or ii.unit_amount * ii.quantity) for ii in self.lines._list])
+        return sum([(ii.amount or ii.unit_amount * ii.quantity)
+                    for ii in self.lines._list])
 
     @property
     def tax(self):
@@ -1088,16 +1089,16 @@ class Invoice(StripeObject):
 
         pending_items = [ii for ii in InvoiceItem._api_list_all(
             None, customer=customer, limit=99)._list
-            if ii.invoice is None]
+                         if ii.invoice is None]
         if (not upcoming and not subscription and
                 not subscription_items and not pending_items):
             raise UserError(400, 'Bad request')
 
         simulation = subscription_items is not None or \
-            subscription_prorate is not None or \
-            subscription_tax_percent is not None or \
-            subscription_default_tax_rates is not None or \
-            subscription_trial_end is not None
+                     subscription_prorate is not None or \
+                     subscription_tax_percent is not None or \
+                     subscription_default_tax_rates is not None or \
+                     subscription_trial_end is not None
 
         current_subscription = None
         li = [s for s in customer_obj.subscriptions._list
@@ -1117,7 +1118,7 @@ class Invoice(StripeObject):
 
         invoice_items = []
         items = subscription_items or \
-            (current_subscription and current_subscription.items._list) or []
+                (current_subscription and current_subscription.items._list) or []
         for si in items:
             if subscription_items is not None:
                 plan = Plan._api_retrieve(si['plan'])
@@ -1135,9 +1136,9 @@ class Invoice(StripeObject):
                             description=plan.name,
                             tax_rates=tax_rates,
                             customer=customer))
-        invoice_items = invoice_items + [ii for ii in InvoiceItem._api_list_all(
-        None, customer=customer, limit=99)._list
-        if ii.invoice is None]
+        invoice_items = invoice_items + [ii for ii in InvoiceItem
+            ._api_list_all(None, customer=customer,
+                           limit=99)._list if ii.invoice is None]
 
         if tax_percent is None:
             if subscription_tax_percent is not None:
@@ -1149,7 +1150,8 @@ class Invoice(StripeObject):
         if current_subscription:
             date = current_subscription.current_period_end
 
-        if not simulation and not current_subscription and len(invoice_items) == 0:
+        if not simulation and not current_subscription and \
+                len(invoice_items) == 0:
             raise UserError(404, 'No upcoming invoices for customer')
 
         elif not simulation and current_subscription:
@@ -1395,7 +1397,8 @@ class InvoiceItem(StripeObject):
     @property
     def tax_amounts(self):
         if self.tax_rates is not None:
-            return [tr._tax_amount(self.amount if(self.amount is not None) else self.unit_amount * self.quantity) for tr in self.tax_rates]
+            return [tr._tax_amount(self.amount if (self.amount is not None)
+                                   else self.unit_amount * self.quantity) for tr in self.tax_rates]
 
     @classmethod
     def _api_list_all(cls, url, customer=None, limit=None):
@@ -1798,7 +1801,7 @@ class PaymentMethod(StripeObject):
     def _api_list_all(cls, url, customer=None, type=None, limit=None):
         try:
             assert _type(customer) is str and customer.startswith('cus_')
-            assert type in ('card', )
+            assert type in ('card',)
         except AssertionError:
             raise UserError(400, 'Bad request')
 
@@ -2273,8 +2276,8 @@ class Subscription(StripeObject):
         self.trial_period_days = trial_period_days
         self.latest_invoice = None
         self._enable_incomplete_payments = (
-            enable_incomplete_payments and
-            payment_behavior != 'error_if_incomplete')
+                enable_incomplete_payments and
+                payment_behavior != 'error_if_incomplete')
 
         self._set_up_plan(Plan._api_retrieve(items[0]['plan']))
         self.start = self.current_period_start
@@ -2315,7 +2318,7 @@ class Subscription(StripeObject):
     def _create_invoice(self):
         pending_items = [ii for ii in InvoiceItem._api_list_all(
             None, customer=self.customer, limit=99)._list
-            if ii.invoice is None]
+                         if ii.invoice is None]
 
         for si in self.items._list:
             pending_items.append(
@@ -2481,7 +2484,7 @@ class Subscription(StripeObject):
                                                  limit=99)
                 for previous_invoice in previous._list:
                     previous_tax_rates = [tr.id for tr in (
-                        previous_invoice.lines._list[0].tax_rates or [])]
+                            previous_invoice.lines._list[0].tax_rates or [])]
                     InvoiceItem(amount=- previous_invoice.subtotal,
                                 currency=previous_invoice.currency,
                                 proration=True,
@@ -2518,8 +2521,8 @@ class Subscription(StripeObject):
         # is not automatically generated. To achieve that, an invoice has to
         # be manually created using the POST /invoices route.
         create_an_invoice = self.plan.billing_scheme == 'per_unit' and (
-            self.plan.interval != old_plan.interval or
-            self.plan.interval_count != old_plan.interval_count)
+                self.plan.interval != old_plan.interval or
+                self.plan.interval_count != old_plan.interval_count)
         if create_an_invoice:
             self._create_invoice()
 
@@ -2598,8 +2601,8 @@ class SubscriptionItem(StripeObject):
         if self.plan.tiers_mode == 'volume':
             index = next(
                 (i for i, t in enumerate(self.plan.tiers)
-                    if t['up_to'] == 'inf'
-                    or self.quantity <= int(t['up_to'])))
+                 if t['up_to'] == 'inf'
+                 or self.quantity <= int(t['up_to'])))
             return self._calculate_amount_in_tier(
                 self.quantity, index)
 
