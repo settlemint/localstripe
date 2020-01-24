@@ -12,9 +12,6 @@ jobs:
   include:
     - stage: building
       python:
-        - 3.5
-        - 3.6
-        - 3.7
         - 3.8
       script:
         - if [[ $TRAVIS_PYTHON_VERSION != nightly ]]; then flake8 .; fi
