@@ -765,7 +765,7 @@ class Customer(StripeObject):
 
         if obj.customer != id:
             raise UserError(404, 'Customer ' + id + ' does not have a '
-                                                    'subscription with ID ' + subscription_id)
+                            'subscription with ID ' + subscription_id)
 
         return obj
 
@@ -775,7 +775,7 @@ class Customer(StripeObject):
 
         if obj.customer != id:
             raise UserError(404, 'Customer ' + id + ' does not have a '
-                                                    'subscription with ID ' + subscription_id)
+                            'subscription with ID ' + subscription_id)
 
         return Subscription._api_update(subscription_id, **data)
 
@@ -1095,10 +1095,10 @@ class Invoice(StripeObject):
             raise UserError(400, 'Bad request')
 
         simulation = subscription_items is not None or \
-                     subscription_prorate is not None or \
-                     subscription_tax_percent is not None or \
-                     subscription_default_tax_rates is not None or \s
-                     subscription_trial_end is not None
+            subscription_prorate is not None or \
+            subscription_tax_percent is not None or \
+            subscription_default_tax_rates is not None or \
+            subscription_trial_end is not None
 
         current_subscription = None
         li = [s for s in customer_obj.subscriptions._list
@@ -1118,7 +1118,7 @@ class Invoice(StripeObject):
 
         invoice_items = []
         items = subscription_items or \
-                (current_subscription and \
+                (current_subscription and
                  current_subscription.items._list) or []
         for si in items:
             if subscription_items is not None:
@@ -1137,9 +1137,9 @@ class Invoice(StripeObject):
                             description=plan.name,
                             tax_rates=tax_rates,
                             customer=customer))
-        invoice_items = invoice_items + [ii for ii in \
-                            InvoiceItem._api_list_all(None, customer=customer,
-                           limit=99)._list if ii.invoice is None]
+        invoice_items = invoice_items + [ii for ii in
+            InvoiceItem._api_list_all(None, customer=customer,
+            limit=99)._list if ii.invoice is None]
 
         if tax_percent is None:
             if subscription_tax_percent is not None:
@@ -1399,7 +1399,8 @@ class InvoiceItem(StripeObject):
     def tax_amounts(self):
         if self.tax_rates is not None:
             return [tr._tax_amount(self.amount if (self.amount is not None)
-                    else self.unit_amount * self.quantity) for tr in self.tax_rates]
+                    else self.unit_amount * self.quantity)
+                    for tr in self.tax_rates]
 
     @classmethod
     def _api_list_all(cls, url, customer=None, limit=None):
