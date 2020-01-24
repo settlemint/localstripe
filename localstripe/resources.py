@@ -15,13 +15,13 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import asyncio
-from datetime import datetime, timedelta
 import hashlib
 import pickle
 import random
 import re
 import string
 import time
+from datetime import datetime, timedelta
 
 from dateutil.relativedelta import relativedelta
 
@@ -1097,7 +1097,7 @@ class Invoice(StripeObject):
         simulation = subscription_items is not None or \
                      subscription_prorate is not None or \
                      subscription_tax_percent is not None or \
-                     subscription_default_tax_rates is not None or \
+                     subscription_default_tax_rates is not None or \s
                      subscription_trial_end is not None
 
         current_subscription = None
@@ -1118,7 +1118,8 @@ class Invoice(StripeObject):
 
         invoice_items = []
         items = subscription_items or \
-                (current_subscription and current_subscription.items._list) or []
+                (current_subscription and \
+                 current_subscription.items._list) or []
         for si in items:
             if subscription_items is not None:
                 plan = Plan._api_retrieve(si['plan'])
@@ -1136,8 +1137,8 @@ class Invoice(StripeObject):
                             description=plan.name,
                             tax_rates=tax_rates,
                             customer=customer))
-        invoice_items = invoice_items + [ii for ii in InvoiceItem
-            ._api_list_all(None, customer=customer,
+        invoice_items = invoice_items + [ii for ii in \
+                            InvoiceItem._api_list_all(None, customer=customer,
                            limit=99)._list if ii.invoice is None]
 
         if tax_percent is None:
@@ -1398,7 +1399,7 @@ class InvoiceItem(StripeObject):
     def tax_amounts(self):
         if self.tax_rates is not None:
             return [tr._tax_amount(self.amount if (self.amount is not None)
-                                   else self.unit_amount * self.quantity) for tr in self.tax_rates]
+                    else self.unit_amount * self.quantity) for tr in self.tax_rates]
 
     @classmethod
     def _api_list_all(cls, url, customer=None, limit=None):
