@@ -1318,7 +1318,8 @@ class InvoiceItem(StripeObject):
     def __init__(self, invoice=None, subscription=None, plan=None, amount=None,
                  currency=None, customer=None, period_start=None,
                  period_end=None, proration=False, description=None,
-                 tax_rates=None, metadata=None, quantity=None, unit_amount=None,**kwargs):
+                 tax_rates=None, metadata=None, quantity=None, unit_amount=None,
+                **kwargs):
         if kwargs:
             raise UserError(400, 'Unexpected ' + ', '.join(kwargs.keys()))
 
