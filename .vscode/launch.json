@@ -5,17 +5,11 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Python: Remote Attach",
+      "name": "Start",
       "type": "python",
-      "request": "attach",
-      "port": 5678,
-      "host": "localhost",
-      "pathMappings": [
-        {
-          "localRoot": "${workspaceFolder}",
-          "remoteRoot": "."
-        }
-      ]
+      "request": "launch",
+      "pythonPath": "/usr/local/bin/python3",
+      "module": "localstripe",
     }
   ]
 }
