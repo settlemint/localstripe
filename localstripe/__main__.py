@@ -14,8 +14,12 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+# import ptvsd
 from . import server
 
 
 if __name__ == '__main__':
+    # print("Waiting for debugger attach")
+    # ptvsd.enable_attach(address=('localhost', 5678), redirect_output=True)
+    # ptvsd.wait_for_attach()
     server.start()
