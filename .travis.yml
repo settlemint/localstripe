@@ -1,10 +1,6 @@
----
 language: python
-dist: xenial  # required for Python >= 3.7 (travis-ci/travis-ci#9069)
-python:
-  - 3.5
-  - 3.6
-  - 3.7
+dist:
+  xenial # required for Python >= 3.7 (travis-ci/travis-ci#9069)
   # Python nightly currently disabled because of:
   #     curl: (56) Recv failure: Connection reset by peer
   # - nightly
@@ -12,12 +8,29 @@ install:
   - pip install flake8 flake8-import-order doc8 Pygments
   - python setup.py sdist
   - pip install dist/localstripe-*.tar.gz
-script:
-  - if [[ $TRAVIS_PYTHON_VERSION != nightly ]]; then flake8 .; fi
-  - doc8 README.rst
-  - python3 -m localstripe &
-  -  # wait for server to be up:
-    timeout=5; while [ $((timeout--)) -ge 0 ]; do
-      nc -z -w 1 localhost 8420; r=$?; [ $r -eq 0 ] && break; sleep 1;
-    done; return $r
-  - ./test.sh
+jobs:
+  include:
+    - stage: building
+      python:
+        - 3.5
+        - 3.6
+        - 3.7
+        - 3.8
+      script:
+        - if [[ $TRAVIS_PYTHON_VERSION != nightly ]]; then flake8 .; fi
+        - doc8 README.rst
+        - python3 -m localstripe &
+        - # wait for server to be up:
+          timeout=5; while [ $((timeout--)) -ge 0 ]; do
+          nc -z -w 1 localhost 8420; r=$?; [ $r -eq 0 ] && break; sleep 1;
+          done; return $r
+        - ./test.sh
+    - stage: building
+      python:
+        - 3.8
+      script:
+        - yes Y | docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD"
+        - export BRANCH=$(if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then echo $TRAVIS_BRANCH; else echo $TRAVIS_PULL_REQUEST_BRANCH; fi)
+        - echo "TRAVIS_BRANCH=$TRAVIS_BRANCH, PR=$PR, BRANCH=$BRANCH"
+        - docker build -t settlemintci/localstripe:${BRANCH//[^a-zA-Z0-9]/} --cache-from settlemintci/localstripe:${BRANCH//[^a-zA-Z0-9]/} .
+        - docker push settlemintci/localstripe:${BRANCH//[^a-zA-Z0-9]/}
