@@ -1324,6 +1324,8 @@ class InvoiceItem(StripeObject):
             raise UserError(400, 'Unexpected ' + ', '.join(kwargs.keys()))
 
         amount = try_convert_to_int(amount)
+        quantity = try_convert_to_int(quantity)
+        unit_amount = try_convert_to_int(unit_amount)
         period_start = try_convert_to_int(period_start)
         period_end = try_convert_to_int(period_end)
         proration = try_convert_to_bool(proration)
@@ -1335,7 +1337,6 @@ class InvoiceItem(StripeObject):
                 assert subscription.startswith('sub_')
             if plan is not None:
                 assert type(plan) is str and plan
-            assert type(amount) is int
             assert type(currency) is str and currency
             assert type(customer) is str and customer.startswith('cus_')
             if period_start is not None:
@@ -1351,8 +1352,13 @@ class InvoiceItem(StripeObject):
             if tax_rates is not None:
                 assert type(tax_rates) is list
                 assert all(type(tr) is str for tr in tax_rates)
-            if (amount is not None):
-                assert unit_amount is None
+            # if amount is not None:
+            #     assert type(amount) is int
+            #     assert unit_amount is None
+            # if unit_amount is not None:
+            #     assert type(unit_amount) is int
+            #     assert quantity is not None
+            #     assert type(quantity) is int
 
         except AssertionError:
             raise UserError(400, 'Bad request')
@@ -1387,7 +1393,7 @@ class InvoiceItem(StripeObject):
     @property
     def tax_amounts(self):
         if self.tax_rates is not None:
-            return [tr._tax_amount(self.amount) for tr in self.tax_rates]
+            return [tr._tax_amount(self.amount if(self.amount is not None) else self.unit_amount * self.quantity) for tr in self.tax_rates]
 
     @classmethod
     def _api_list_all(cls, url, customer=None, limit=None):
