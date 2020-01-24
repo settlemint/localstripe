@@ -1118,8 +1118,8 @@ class Invoice(StripeObject):
 
         invoice_items = []
         items = subscription_items or \
-                (current_subscription and
-                 current_subscription.items._list) or []
+            (current_subscription and
+             current_subscription.items._list) or []
         for si in items:
             if subscription_items is not None:
                 plan = Plan._api_retrieve(si['plan'])
@@ -1138,8 +1138,8 @@ class Invoice(StripeObject):
                             tax_rates=tax_rates,
                             customer=customer))
         invoice_items = invoice_items + [ii for ii in
-            InvoiceItem._api_list_all(None, customer=customer,
-            limit=99)._list if ii.invoice is None]
+                                         InvoiceItem._api_list_all(None, customer=customer,
+                                                                   limit=99)._list if ii.invoice is None]
 
         if tax_percent is None:
             if subscription_tax_percent is not None:
