@@ -1,3 +1,5 @@
+.. image:: https://api.travis-ci.com/settlemint/localstripe.svg?branch=beta
+
 localstripe
 ===========
 
